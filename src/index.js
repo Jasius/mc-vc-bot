@@ -1,8 +1,8 @@
 (async () => {
     const Discord = require('discord.js');
-    const bot = new Discord.Client();
     const config = require(__dirname + '/../config.json');
     const sqlite = require('sqlite');
+    const bot = new Discord.Client();
     const db = await sqlite.open(__dirname + '/../db/channels.db');
 
     async function purgeAll() {
@@ -17,7 +17,7 @@
         while (true) {
             const messages = await channel.fetchMessages({ limit: 100 });
 
-            if (messages.array().length > 0) {
+            if (messages.size > 0) {
                 await channel.bulkDelete(messages);
             } else {
                 db.run('UPDATE channels SET set_to_purge = 0 WHERE text_id = ?', [channel.id]);
@@ -37,7 +37,7 @@
             const textChannel = bot.channels.get(channels.find((v) => v.voice_id == oldMember.voiceChannelID).text_id);
             const permissions = textChannel.permissionOverwrites.find((v) => v.id == oldMember.id);
 
-            if (!voiceChannel.members.length) {
+            if (voiceChannel.members.size < 1) {
                 db.run('UPDATE channels SET set_to_purge = 1 WHERE voice_id = ?', [oldMember.voiceChannelID]);
             }
             
